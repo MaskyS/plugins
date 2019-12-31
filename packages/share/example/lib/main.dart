@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(DemoApp());
@@ -47,7 +50,7 @@ class DemoAppState extends State<DemoApp> {
                       child: const Text('Share'),
                       onPressed: text.isEmpty
                           ? null
-                          : () {
+                          : () async{
                               // A builder is used to retrieve the context immediately
                               // surrounding the RaisedButton.
                               //
@@ -56,7 +59,8 @@ class DemoAppState extends State<DemoApp> {
                               // a RenderObjectWidget. The RaisedButton's RenderObject
                               // has its position and size after it's built.
                               final RenderBox box = context.findRenderObject();
-                              Share.share(text,
+                              final File file = await _createTextFile('sample.txt', "Hello world!");
+                              Share.shareFile(file,
                                   sharePositionOrigin:
                                       box.localToGlobal(Offset.zero) &
                                           box.size);
@@ -68,5 +72,12 @@ class DemoAppState extends State<DemoApp> {
             ),
           )),
     );
+  }
+
+  Future<File> _createTextFile(String filename, String content) async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final File file = File('${directory.path}/$filename');
+    await file.writeAsString(content);
+    return file;
   }
 }
